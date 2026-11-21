@@ -316,6 +316,25 @@ public sealed class MainForm : Form
         Application.DoEvents();
     }
 
+    /// <summary>Current party draft, for the harness.</summary>
+    internal List<string> UiPartyDraft() => _partyDraft?.ToList() ?? new List<string>();
+
+    /// <summary>Click "+ 新增" the way the button does, for the harness.</summary>
+    internal void UiPartyAdd()
+    {
+        var v = _slot is null ? null : GenerativeSave.Core.Editing.PartyView.From(_slot);
+        if (v is not null) AddPartySlot(v);
+    }
+
+    /// <summary>Remove slot i, for the harness.</summary>
+    internal void UiPartyRemove(int i)
+    {
+        var draft = _partyDraft ?? new List<string>();
+        if (i < 0 || i >= draft.Count) return;
+        draft.RemoveAt(i);
+        CommitParty(draft);
+    }
+
     /// <summary>Navigate to a page by key, for the harness.</summary>
     internal void UiNavigate(string key)
     {
@@ -1456,8 +1475,11 @@ public sealed class MainForm : Form
             return;
         }
 
-        // Rows are rebuilt from scratch on every change, so the working copy of
-        // the id list has to outlive a single rebuild.
+        // The draft mirrors what is actually in the save, so it is rebuilt from
+        // the property every time — never carried over. An earlier version kept
+        // the old draft when it existed, which meant a deleted member came back
+        // on the next rebuild. CommitParty writes first and rebuilds second, so
+        // by the time we get here the save already holds the new list.
         _partyDraft = v.Members.Select(m => m.Id).ToList();
 
         var card = NewCard("小队");
@@ -1656,10 +1678,10 @@ public sealed class MainForm : Form
         if (!v.SetMembers(draft, out var err))
         {
             MessageBox.Show(this, err, "小队", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            MarkDirtyAndRefresh();
+            MarkDirtyAndRebuild();
             return;
         }
-        MarkDirtyAndRefresh();
+        MarkDirtyAndRebuild();
     }
 
     /// <summary>Append an empty slot, then let the user pick who goes in it.</summary>
@@ -7194,6 +7216,11 @@ public sealed class MainForm : Form
     }
 
     // ------------------------------------------------------------------ state
+    /// <summary>
+    /// Update the dirty badge and buttons. Deliberately does NOT rebuild the
+    /// page: this is passed as an Action all over the editor, and rebuilding
+    /// would steal focus from the control being edited.
+    /// </summary>
     private void MarkDirtyAndRefresh()
     {
         bool dirty = _slot?.IsDirty == true;
@@ -7202,6 +7229,17 @@ public sealed class MainForm : Form
         UpdateDirtyBadge();
         RefreshSubtitle();
         if (dirty) SetStatus("已修改，记得点「保存修改」");
+    }
+
+    /// <summary>
+    /// Same, then rebuild the current page. Needed when the SHAPE of a list
+    /// changed — adding or removing a row. Without the rebuild the new row never
+    /// appears, so the click looks dead even though the save was written.
+    /// </summary>
+    private void MarkDirtyAndRebuild()
+    {
+        MarkDirtyAndRefresh();
+        if (_current is not null) Navigate(_current);
     }
 
     private void UpdateDirtyBadge()
