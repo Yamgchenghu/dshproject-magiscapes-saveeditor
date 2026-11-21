@@ -9,6 +9,11 @@
     <LangVersion>latest</LangVersion>
     <RootNamespace>GenerativeSave.Editor</RootNamespace>
     <AssemblyName>GenerativeSaveEditor</AssemblyName>
+    <Version>1.1.0</Version>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <FileVersion>1.1.0.0</FileVersion>
+    <Product>麦琪的花园 存档修改器</Product>
+    <Company>民间</Company>
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
     <SatelliteResourceLanguages>zh-Hans;en</SatelliteResourceLanguages>
   </PropertyGroup>

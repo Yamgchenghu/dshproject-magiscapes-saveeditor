@@ -86,6 +86,37 @@ public static class CatalogStore
 
     public static string FilePath => Path.Combine(Dir, "catalog.json");
 
+    /// <summary>
+    /// Write the copy of catalog.json baked into the executable, but only when
+    /// the user has none. An existing catalog is user data and is never
+    /// overwritten — it grows as they play, so replacing it would destroy work.
+    /// </summary>
+    public static void SeedIfMissing()
+    {
+        try
+        {
+            if (!Enabled) return;
+            if (File.Exists(FilePath)) return;
+
+            var asm = typeof(CatalogStore).Assembly;
+            var name = asm.GetManifestResourceNames()
+                          .FirstOrDefault(n => n.EndsWith("catalog.json", StringComparison.OrdinalIgnoreCase));
+            if (name is null) return;
+
+            using var stream = asm.GetManifestResourceStream(name);
+            if (stream is null) return;
+
+            Directory.CreateDirectory(Dir);
+            var tmp = FilePath + ".tmp";
+            using (var outFile = File.Create(tmp)) stream.CopyTo(outFile);
+            File.Move(tmp, FilePath, overwrite: true);
+        }
+        catch
+        {
+            // A failed seed is not fatal: the editor works with an empty library.
+        }
+    }
+
     public static CatalogFile Load()
     {
         try

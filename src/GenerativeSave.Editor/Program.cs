@@ -35,6 +35,10 @@ internal static class Program
         if (args.Length > 0 && args[0].StartsWith("--"))
             GenerativeSave.Core.Library.CatalogStore.Enabled = false;
 
+        // Fresh install: write out the starter library that ships inside the
+        // executable. No-op when the user already has one — that file is theirs.
+        GenerativeSave.Core.Library.CatalogStore.SeedIfMissing();
+
         // --shot <dir>: render each page to a PNG and exit. Used to verify layout
         // without a human (or a fragile mouse-driving harness) in the loop.
         // An optional second argument names the save to open. Without it the

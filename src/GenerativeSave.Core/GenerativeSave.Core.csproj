@@ -9,4 +9,11 @@
     <AssemblyName>GenerativeSave.Core</AssemblyName>
   </PropertyGroup>
 
+  <ItemGroup>
+    <!-- The starter library ships inside the executable so a fresh install has
+         item and NPC names immediately. It is only written out when the user
+         has no catalog.json of their own. -->
+    <EmbeddedResource Include="Library\catalog.json" />
+  </ItemGroup>
+
 </Project>

@@ -977,6 +977,21 @@ public sealed class MainForm : Form
         _status.BackColor = Color.Transparent;
         statusBar.Controls.Add(_status);
 
+        // Version sits in the bottom-right corner, docked so it stays put no
+        // matter how long the status text gets.
+        var ver = new Label
+        {
+            Text = AppVersion.Display,
+            Font = Theme.Small,
+            ForeColor = Theme.Muted,
+            AutoSize = true,
+            Dock = DockStyle.Right,
+            TextAlign = ContentAlignment.MiddleRight,
+            Padding = new Padding(0, 5, 16, 0),
+            BackColor = Color.Transparent,
+        };
+        statusBar.Controls.Add(ver);
+
         Controls.Add(_content);
         Controls.Add(_sidebar);
         Controls.Add(_headerBar);
